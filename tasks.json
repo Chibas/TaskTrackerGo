@@ -1,23 +1,16 @@
 [
   {
-    "id": 0,
-    "description": "testDescription",
-    "status": "testStatus",
-    "createdAt": "2026-06-22T10:00:00Z",
-    "updatedAt": "2026-06-22T10:00:00Z"
-  },
-  {
     "id": 1,
-    "description": "testDescription 1",
-    "status": "testStatus",
-    "createdAt": "2026-06-22T10:00:00Z",
-    "updatedAt": "2026-06-22T10:00:00Z"
+    "description": "Go for a run",
+    "status": "in-progress",
+    "createdAt": "2026-06-23T01:34:44.400618+01:00",
+    "updatedAt": "2026-06-23T01:45:57.462517+01:00"
   },
   {
     "id": 2,
-    "description": "testDescription 2",
-    "status": "testStatus",
-    "createdAt": "2026-06-22T10:00:00Z",
-    "updatedAt": "2026-06-22T10:00:00Z"
+    "description": "Buy some groceries",
+    "status": "done",
+    "createdAt": "2026-06-23T01:35:01.156915+01:00",
+    "updatedAt": "2026-06-23T01:46:17.6806+01:00"
   }
 ]

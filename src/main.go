@@ -5,10 +5,11 @@ import (
 	"os"
 
 	"github.com/Chibas/TaskTrackerGo/src/mapper"
+	"github.com/Chibas/TaskTrackerGo/src/storage"
+	"github.com/Chibas/TaskTrackerGo/src/task"
 )
 
 func main() {
-	var data string
 	argsCmd := os.Args[1:]
 
 	if len(argsCmd) == 0 {
@@ -16,11 +17,18 @@ func main() {
 		return
 	}
 
+	var arg1 any
+	var arg2 any
 	if len(argsCmd) > 1 {
-		data = argsCmd[1]
+		arg1 = argsCmd[1]
+	}
+	if len(argsCmd) > 2 {
+		arg2 = argsCmd[2]
 	}
 
-	m := mapper.NewCommandMapper()
+	storageSvc := storage.NewStorage("tasks.json")
+	taskSvc := task.NewTaskService(storageSvc)
+	m := mapper.NewCommandMapper(taskSvc)
 	cmd, err := m.ParseCommand(argsCmd[0])
 
 	if err != nil {
@@ -28,7 +36,13 @@ func main() {
 		return
 	}
 
-	fmt.Printf("Data %s \n", data)
+	fmt.Printf("Data %v \n", arg1)
 
-	m.ExecuteCommand(cmd, data)
+	if err := m.ExecuteCommand(cmd, arg1, arg2); err != nil {
+		fmt.Println("execute error:", err)
+	}
+
+	if cmd != mapper.List && err == nil {
+		m.ExecuteCommand(mapper.Command(mapper.List), nil, nil)
+	}
 }

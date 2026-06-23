@@ -2,24 +2,25 @@ package mapper
 
 import (
 	"fmt"
-	"time"
+	"strconv"
 
 	"github.com/Chibas/TaskTrackerGo/src/storage"
+	"github.com/Chibas/TaskTrackerGo/src/task"
 )
 
 type CommandMapper interface {
 	ParseCommand(s string) (Command, error)
-	ExecuteCommand(cmd Command, data any) error
+	ExecuteCommand(cmd Command, arg1 any, arg2 any) error
 	LogList(l []storage.Task)
 }
 
 type commandMapper struct {
-	storage storage.Storage
+	taskService task.TaskService
 }
 
-func NewCommandMapper() CommandMapper {
+func NewCommandMapper(taskService task.TaskService) CommandMapper {
 	return &commandMapper{
-		storage: storage.NewStorage("tasks.json"),
+		taskService: taskService,
 	}
 }
 
@@ -32,33 +33,79 @@ func (c *commandMapper) ParseCommand(s string) (Command, error) {
 	}
 }
 
-func (c *commandMapper) ExecuteCommand(cmd Command, data any) error {
+func (c *commandMapper) ExecuteCommand(cmd Command, arg1 any, arg2 any) error {
 	switch cmd {
 	case Add:
-		fmt.Printf("ADD %s", data)
+		description, ok := arg1.(string)
+		if !ok {
+			return fmt.Errorf("add requires a description string")
+		}
+		return c.taskService.AddTask(description)
+
 	case Update:
-		fmt.Printf("Update %s", data)
+		idStr, ok := arg1.(string)
+		if !ok {
+			return fmt.Errorf("update requires an id")
+		}
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			return fmt.Errorf("invalid id: %w", err)
+		}
+		description, ok := arg2.(string)
+		if !ok {
+			return fmt.Errorf("update requires a description string")
+		}
+		return c.taskService.UpdateTask(id, description)
+
 	case Delete:
-		fmt.Printf("Delete %s", data)
+		idStr, ok := arg1.(string)
+		if !ok {
+			return fmt.Errorf("delete requires an id")
+		}
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			return fmt.Errorf("invalid id: %w", err)
+		}
+		return c.taskService.DeleteTask(id)
+
 	case MarkInProgress:
-		fmt.Printf("MarkInProgress %s", data)
+		idStr, ok := arg1.(string)
+		if !ok {
+			return fmt.Errorf("mark-in-progress requires an id")
+		}
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			return fmt.Errorf("invalid id: %w", err)
+		}
+		return c.taskService.MarkInProgress(id)
+
 	case MarkDone:
-		fmt.Printf("MarkDone %s", data)
+		idStr, ok := arg1.(string)
+		if !ok {
+			return fmt.Errorf("mark-done requires an id")
+		}
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			return fmt.Errorf("invalid id: %w", err)
+		}
+		return c.taskService.MarkDone(id)
+
 	case List:
-		fmt.Printf("List %s \n", data)
-		fileData, err := c.storage.ReadStorage()
+		fileData, err := c.taskService.List()
 		if err != nil {
 			return err
 		}
 		c.LogList(fileData)
+		return nil
+
 	default:
 		return fmt.Errorf("Unknown command %s", cmd)
 	}
-	return nil
+
 }
 
 func (c *commandMapper) LogList(l []storage.Task) {
-	for index, task := range l {
-		fmt.Printf("#%d Name: %s Status: %s 🔼 Created: %s  🕐 Updated: %s \n", index, task.Description, task.Status, time.Time(task.CreatedAt).Format("02 Jan 2006 15:04:05"), time.Time(task.UpdatedAt).Format("02 Jan 2006 15:04:05"))
+	for _, task := range l {
+		fmt.Printf("#%d | Name: %s | Status: %s | 🔼 Created: %s  🕐 Updated: %s \n", task.ID, task.Description, task.Status, task.CreatedAt.Format("02 Jan 2006 15:04:05"), task.UpdatedAt.Format("02 Jan 2006 15:04:05"))
 	}
 }

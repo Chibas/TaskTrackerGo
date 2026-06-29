@@ -1,0 +1,21 @@
+# Local task data
+/tasks.json
+
+# Go build artifacts
+/bin/
+/tasktracker
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test and coverage output
+*.test
+*.out
+coverage.out
+
+# macOS / editor files
+.DS_Store
+.idea/
+.vscode/

@@ -14,7 +14,7 @@ type TaskService interface {
 	DeleteTask(id int) error
 	MarkDone(id int) error
 	MarkInProgress(id int) error
-	List() ([]storage.Task, error)
+	List(status string) ([]storage.Task, error)
 }
 
 type taskService struct {
@@ -124,15 +124,21 @@ func (s *taskService) MarkInProgress(id int) error {
 	return nil
 }
 
-func (s *taskService) List() ([]storage.Task, error) {
+func (s *taskService) List(status string) ([]storage.Task, error) {
 	fileData, err := s.storage.ReadStorage()
 	if err != nil {
 		return nil, err
 	}
-	return fileData, nil
-}
 
-// # Listing tasks by status
+	if status == "" {
+		return fileData, nil
+	}
+
+	return slices.DeleteFunc(fileData, func(t storage.Task) bool {
+		return t.Status != status
+	}), nil
+
+}
 
 func getMaxId(taskList []storage.Task) int {
 	maxID := 0

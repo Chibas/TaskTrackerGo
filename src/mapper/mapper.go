@@ -91,7 +91,11 @@ func (c *commandMapper) ExecuteCommand(cmd Command, arg1 any, arg2 any) error {
 		return c.taskService.MarkDone(id)
 
 	case List:
-		fileData, err := c.taskService.List()
+		filter, ok := arg1.(string)
+		if !ok {
+			filter = ""
+		}
+		fileData, err := c.taskService.List(filter)
 		if err != nil {
 			return err
 		}
